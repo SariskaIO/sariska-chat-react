@@ -1,29 +1,43 @@
 import React, { useState } from 'react';
 import './App.css';
 import CreateChannel from './components/channel/CreateChannel';
-import ChatMessage from './components/messages/ChatMessage';
-import UseEventHandler from './components/messages/UseEventHandler';
+import UseEventHandler from './components/channel/UseEventHandler';
+import MessageList   from './components/messages/MessageList';
 
-
-function App(props) {
-  
+const App = ()=> {
+  const [user, setUser] = useState(null);
+  const [room, setRoom] = useState(null);
   const [messages, setMessages] = useState([]);
 
-  const room = 'room';
+  const chatChannel = CreateChannel('chat:room123');
 
-  const {channel: chatChannel} = CreateChannel('chat: ' + room, undefined, (channel, { messages: initialMessages}) => {
-    setMessages(initialMessages);
-    }
-  );
+  UseEventHandler(chatChannel, 'user_joined', response => {
+       const {room, user}  = response;
+       setUser(user);
+       setRoom(room);
+  });
 
   UseEventHandler(chatChannel, 'new_message', message => {
-    setMessages(messages.slice(0).concat([message]));
-  })
-  
-  return (
+      setMessages(messages => [...messages, message])
+  });
 
+  UseEventHandler(chatChannel, 'archived_message', message => {
+      setMessages(messages => [message, ...messages])
+  });
+
+  UseEventHandler(chatChannel, 'archived_message_count', payload => {
+     const { page: { count }} = payload;
+     console.log('total archived message count', count);
+  });
+
+  const pushMessage = (message)=>{
+      setMessages(messages => [...messages, message]);
+      chatChannel.push({content: message});
+  };
+
+  return (
       <div className="App">
-          <ChatMessage messages={messages} />
+          <MessageList messages={messages} pushMessage={pushMessage} />
       </div>
   );
 }

@@ -5,13 +5,9 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import SocketProvider from './components/socket/SocketProvider';
 
-const token = 'token';
-const socketUrl = "wss://localhost:4000/socket";
-const socketOptions = { params: { 'token': token }};
-
 ReactDOM.render(
   <React.StrictMode>
-    <SocketProvider wsUrl={socketUrl} options={socketOptions}>
+    <SocketProvider>
       <App />
     </SocketProvider>
   </React.StrictMode>,
