@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react'
-import PropTypes from 'prop-types'
 import {Socket} from 'phoenix';
 import SocketContext from './SocketContext';
 import {getToken} from "../../utils";
@@ -11,6 +10,7 @@ const SocketProvider = ({children}) => {
         const fetchData = async ()=> {
             console.log('socket', socket);
             const token = await getToken();
+            console.log('token',token);
             const params = {token};
             const s = new Socket(WEB_SOCKET_URL, {params});
             s.onOpen( () => console.log("connection open!") )

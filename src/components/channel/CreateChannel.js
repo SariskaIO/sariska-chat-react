@@ -4,6 +4,7 @@ import SocketContext from '../socket/SocketContext'
 const CreateChannel = (topic, params={}, onJoin) => {
     const socket = useContext(SocketContext);
     const [channel, setChannel] = useState(null);
+    
     useEffect(()=>{
         if(socket===null){
             return;
