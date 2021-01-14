@@ -7,15 +7,14 @@ export const getToken = async ()=> {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            sessionId: "test12321",
             apiKey: "24fd6f92d6d017492e3e98e334ebafc76dd350bb93a0729d38", // enter your app secret
-            user: {  
-                 id: "101",
-                 name: "gurudeep",
-                 //Optionally, you can provide user display information for better tracking and user experience
-                //  avatar: <user_avatar>, 
-                //  email: <user_email>
-             }
+            // user: {  
+            //     Optionally, you can provide user display information for better tracking and user experience. otherwise, anonymous user will be created
+            //     id: <user_avatar>, 
+            //     name: <user_avatar>, 
+            //     email: <user_email>
+            //     avatar: <user_avatar>, 
+            //  }
         })
     };
     try {

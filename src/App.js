@@ -24,7 +24,7 @@ const App = ()=> {
 //console.log('usersed are: ', JSON.parse(localStorage.getItem("user")) || 'hello');
 
   UseEventHandler(chatChannel, 'new_message', message => {
-      console.log('newMessage', message);
+    console.log("new_message", message);
       setMessages(messages => [...messages, message])
   });
 
@@ -39,10 +39,8 @@ const App = ()=> {
   });
 
   const pushMessage = (message)=>{
-      console.log('channel', chatChannel);
       setMessages(messages => [...messages, message]);
       chatChannel.push('new_message', {content: message});
-      console.log('channel', chatChannel);
   };
 
 
