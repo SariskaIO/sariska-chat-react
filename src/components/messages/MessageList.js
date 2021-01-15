@@ -29,7 +29,8 @@ const useStyles = makeStyles((theme) => ({
       width: '80%',
       margin: 'auto',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      height: '60vh'
     },
     cardHeader: {
         backgroundColor: `${colors.skyblue}`
@@ -40,7 +41,12 @@ const useStyles = makeStyles((theme) => ({
     },
     cardContent: {
         flex: 1,
-        height: '80vh'
+        height: '200px',
+        overflow: 'auto'
+    },
+    cardAction: {
+        boxShadow: '0px 4px 4px 2px rgba(0,0,0,0.8)',
+        zIndex: '9'
     },
     cardForm: {
         display: 'flex',
@@ -78,6 +84,13 @@ const useStyles = makeStyles((theme) => ({
         width: '29px',
         backgroundColor: `${colors.blue}`
     },
+
+    userAvatar1: {
+        height: '26px', 
+        width: '26px',
+        backgroundColor: `${colors.white}`,
+        color: `${colors.blue}`,
+    },
     customWidth: {
         maxWidth: 100,
         color: '#fff',
@@ -87,11 +100,12 @@ const useStyles = makeStyles((theme) => ({
     }
   }));
   
-const MessageList = ({messages, pushMessage, room}) => {
+const MessageList = ({messages, pushMessage, user}) => {
     const classes = useStyles();
-    const [names, setNames] = useState([]);
     const [text, setText] = useState('');
-    const [user, setUser] = useState('')
+    const [chat, setChat] = useState('');
+    const [room, setRoom] = useState(null);
+    //const [user, setUser] = useState(null);
 
 
     const isMessageEmpty = (text) => {
@@ -109,23 +123,32 @@ const MessageList = ({messages, pushMessage, room}) => {
     const handleSubmit=(e)=>{
         e.preventDefault();
         !disableButton && 
-        setNames([text, ...names]);
         pushMessage(text);
+        setChat(chat => [...chat,text]);
         !disableButton && setText('');
     }
 
-    console.log('user will be', user)
 
     useEffect(()=> {
-       const userDetails = localStorage.getItem("user");
-        setUser(userDetails)
+       const userDetails = JSON.parse(localStorage.getItem("user"));
+       const roomDetails = JSON.parse(localStorage.getItem("room"));
+        //setUser(userDetails);
+        setRoom(roomDetails);
     },[])
+
+    const scrollRef = useRef(null);
+    const scrollToBottom = () => {
+        scrollRef.current.scrollIntoView({ behavior: 'smooth' })
+      }
+    useEffect(()=>{
+        scrollToBottom();
+    },[text])
 
     console.log('userDetails are', user);
     
     console.log('text is', text);
 
-    console.log('text is', room);
+    console.log('room is', room);
 
     return (
         <div className={classes.root}>
@@ -133,12 +156,9 @@ const MessageList = ({messages, pushMessage, room}) => {
       <CardHeader
         avatar={
             <div className={classes.avatarList}>
-            <Tooltip TransitionComponent={Zoom} title={names.slice(' ').join(', ')} arrow classes={{ tooltip: classes.customWidth }}>
-                <AvatarGroup max={3}>
-                  <Avatar className={classes.userAvatar}>R</Avatar>
-                  <Avatar className={classes.userAvatar}>B</Avatar>
-                  <Avatar className={classes.userAvatar}>H</Avatar>
-                  <Avatar className={classes.userAvatar}>S</Avatar>
+            <Tooltip TransitionComponent={Zoom} title="guru"/*{user.name}*/ arrow classes={{ tooltip: classes.customWidth }}>
+                <AvatarGroup max={2}>
+                  <Avatar className={classes.userAvatar1}>G{/*user.name.toUpperCase().slice(0,1)*/}</Avatar>
                 </AvatarGroup>
                 </Tooltip>
         </div>
@@ -148,30 +168,25 @@ const MessageList = ({messages, pushMessage, room}) => {
             <MoreVertIcon />
           </IconButton>
         }
-        //title={`${room.created_by} created ${room.session_id}  ${room.created_at.getDate()}`}
+        //title={`Room Name: ${room.session_id}, Creator : ${room.created_by}, Created-on: ${room.inserted_at.slice(0,10)}`}
         title ="guru"
         className={classes.cardHeader}
       />
       <CardContent className={classes.cardContent}>
       <Typography variant="body2" color="textSecondary" component="p">
-          Hey ! Gurudeep
+          Hey ! Gurudeep{/*user.name*/}
         </Typography>
         <Box className={classes.box}>
-            {names.map((name, id)=> {
+            {messages.map((message, id)=> {
                 return (
-                    <Box className={classes.chatLine} key={id}>
-                    <Avatar aria-label="user" className={classes.userAvatar}>
-                        G
-                    </Avatar>
-                    <Typography key={id} className={classes.text}>
-                        {name}
-                    </Typography>
-                    </Box>
+                    <MessageItem message={message} id={id} user={user} />
                 )
             })}
         </Box>
+
+        <Typography ref={scrollRef} style={{height: '18px'}}></Typography>
       </CardContent>
-      <CardActions disableSpacing>
+      <CardActions disableSpacing className={classes.cardAction}>
         <form noValidate autoComplete="off" className={classes.cardForm} onSubmit={handleSubmit}>
         <Grid container spacing={1} alignItems="flex-end" style={{width: '100%', alignItems: 'center'}}>
           <Grid item>
@@ -207,10 +222,3 @@ const MessageList = ({messages, pushMessage, room}) => {
 
 export default MessageList;
 
-const user= {  
-    id: "1",
-    name: "Gurudeep",
-    //Optionally, you can provide user display information for better tracking and user experience
-   //  avatar: <user_avatar>, 
-   //  email: <user_email>
-}
