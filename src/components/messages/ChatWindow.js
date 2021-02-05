@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
       textAlign: 'left'
     },
   }));
-  
+
 const ChatWindow = ({messages, user, pushMessage, room}) => {
     const classes = useStyles();
 

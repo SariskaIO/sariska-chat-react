@@ -10,7 +10,7 @@ const App = ()=> {
   const [messages, setMessages] = useState([]);
   const [chat, setchat] = useState('hello guru');
 
-  const chatChannel = CreateChannel('chat:room123', {});
+  const chatChannel = CreateChannel('chat:room1235', {});
 
   UseEventHandler(chatChannel, 'user_joined', response => {
        const {room, user}  = response;
