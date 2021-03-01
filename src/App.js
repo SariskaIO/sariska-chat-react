@@ -10,7 +10,7 @@ const App = ()=> {
   const [messages, setMessages] = useState([]);
   const [chat, setchat] = useState('hello guru');
 
-  const chatChannel = CreateChannel('chat:room1235', {});
+  const chatChannel = CreateChannel('chat:yo', {});
 
   UseEventHandler(chatChannel, 'user_joined', response => {
        const {room, user}  = response;
@@ -28,7 +28,7 @@ const App = ()=> {
   });
 
   UseEventHandler(chatChannel, 'archived_message', message => {
-       console.log('archived', message)
+       console.log('archived', JSON.stringify(message));
       setMessages(messages => [message, ...messages])
   });
 
@@ -38,8 +38,9 @@ const App = ()=> {
   });
 
   const pushMessage = (message)=>{
-      setMessages(messages => [...messages, message]);
-      chatChannel.push('new_message', {content: message});
+      const new_message =  {content: message}
+      setMessages(messages => [...messages, new_message]);
+      chatChannel.push('new_message', new_message);
   };
 
   console.log('message one two', messages);

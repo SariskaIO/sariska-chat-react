@@ -29,7 +29,7 @@ const MessageItem = ({user, message, id}) => {
                 {user.name.toUpperCase().slice(0,1)}
             </Avatar>
             <Typography key={id} className={classes.text}>
-                {message.content || message}
+                {message.content}
             </Typography>
         </Box>
     );
