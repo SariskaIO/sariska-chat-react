@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
     },
     card: {
       flex: 1,
-      width: '80%',
+      width: '100%',
       margin: 'auto',
       display: 'flex',
       flexDirection: 'column',
@@ -156,9 +156,8 @@ const MessageList = ({messages, pushMessage, user}) => {
       <CardHeader
         avatar={
             <div className={classes.avatarList}>
-            <Tooltip TransitionComponent={Zoom} title="guru"/*{user.name}*/ arrow classes={{ tooltip: classes.customWidth }}>
+            <Tooltip TransitionComponent={Zoom} title={user.name} arrow classes={{ tooltip: classes.customWidth }}>
                 <AvatarGroup max={2}>
-                  <Avatar className={classes.userAvatar1}>G{/*user.name.toUpperCase().slice(0,1)*/}</Avatar>
                 </AvatarGroup>
                 </Tooltip>
         </div>
@@ -168,13 +167,11 @@ const MessageList = ({messages, pushMessage, user}) => {
             <MoreVertIcon />
           </IconButton>
         }
-        //title={`Room Name: ${room.session_id}, Creator : ${room.created_by}, Created-on: ${room.inserted_at.slice(0,10)}`}
-        title ="guru"
+        title={`Room Name: ${room?.session_id}, Name: ${user?.name}`}
         className={classes.cardHeader}
       />
       <CardContent className={classes.cardContent}>
       <Typography variant="body2" color="textSecondary" component="p">
-          Hey ! Gurudeep{/*user.name*/}
         </Typography>
         <Box className={classes.box}>
             {messages.map((message, id)=> {

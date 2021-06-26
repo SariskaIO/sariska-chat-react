@@ -26,7 +26,7 @@ const MessageItem = ({user, message, id}) => {
     return (
         <Box className={classes.chatLine} key={id}>
             <Avatar aria-label="user" className={classes.userAvatar}>
-                {user.name.toUpperCase().slice(0,1)}
+                {message.created_by_name?.toUpperCase().slice(0,1)}
             </Avatar>
             <Typography key={id} className={classes.text}>
                 {message.content}

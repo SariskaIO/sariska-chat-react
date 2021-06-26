@@ -5,12 +5,12 @@ import UseEventHandler from './components/channel/UseEventHandler';
 import ChatWindow from './components/messages/ChatWindow';
 
 const App = ()=> {
-  const [user, setUser] = useState(null);
-  const [room, setRoom] = useState(null);
+  const [user, setUser] = useState({});
+  const [room, setRoom] = useState({});
   const [messages, setMessages] = useState([]);
   const [chat, setchat] = useState('hello guru');
 
-  const chatChannel = CreateChannel('chat:yo', {});
+  const chatChannel = CreateChannel('chat:yoo', {});
 
   UseEventHandler(chatChannel, 'user_joined', response => {
        const {room, user}  = response;
@@ -38,7 +38,7 @@ const App = ()=> {
   });
 
   const pushMessage = (message)=>{
-      const new_message =  {content: message}
+      const new_message =  {content: message, created_by_name: user.name};
       setMessages(messages => [...messages, new_message]);
       chatChannel.push('new_message', new_message);
   };

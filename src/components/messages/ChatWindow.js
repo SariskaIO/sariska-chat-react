@@ -30,16 +30,6 @@ const ChatWindow = ({messages, user, pushMessage, room}) => {
 
     return (
         <div className={classes.root}>
-            <AppBar position="static">
-               <Toolbar>
-                 <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-                   <img src={COMPANY_LOGO} />
-                 </IconButton>
-                 <Typography variant="h6" className={classes.title}>
-                   Sariska
-                 </Typography>
-               </Toolbar>
-             </AppBar>
             <MessageList messages={messages} user={user} pushMessage={pushMessage} room={room}/>
         </div>
     )
