@@ -10,7 +10,7 @@ const App = ()=> {
   const [messages, setMessages] = useState([]);
   const [chat, setchat] = useState('hello guru');
 
-  const chatChannel = CreateChannel('chat:yoo', {});
+  const chatChannel = CreateChannel('chat:tesqhjehjqhjehjqwt4567', {});
 
   UseEventHandler(chatChannel, 'user_joined', response => {
        const {room, user}  = response;
@@ -34,7 +34,7 @@ const App = ()=> {
 
   UseEventHandler(chatChannel, 'archived_message_count', payload => {
      const { page: { count }} = payload;
-     console.log('total archived message count', count);
+     console.log('total archived message count', count); 
   });
 
   const pushMessage = (message)=>{
