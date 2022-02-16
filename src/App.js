@@ -38,7 +38,7 @@ const App = ()=> {
   });
 
   const pushMessage = (message)=>{
-      const new_message =  {content: message, created_by_name: user.name};
+      const new_message =  {content: message, created_by_name: user.name,  x: "uu", y: { x: "ghhg"}};
       setMessages(messages => [...messages, new_message]);
       chatChannel.push('new_message', new_message);
   };
