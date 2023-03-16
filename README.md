@@ -1,3 +1,7 @@
+# Live Demo
+
+You can find a deployed version of the chat demo here: https://sariska-chat-react.netlify.app/
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
