@@ -20,15 +20,11 @@ const App = ()=> {
        localStorage.setItem("room",JSON.stringify({session_id : room.session_id, created_by: room.created_by, inserted_at: room.inserted_at}));
   });
 
-//console.log('usersed are: ', JSON.parse(localStorage.getItem("user")) || 'hello');
-
   UseEventHandler(chatChannel, 'new_message', message => {
-    console.log("new_message", message);
       setMessages(messages => [...messages, message])
   });
 
   UseEventHandler(chatChannel, 'archived_message', message => {
-       console.log('archived', JSON.stringify(message));
       setMessages(messages => [message, ...messages])
   });
 
@@ -43,7 +39,6 @@ const App = ()=> {
       chatChannel.push('new_message', new_message);
   };
 
-  console.log('message one two', messages);
 
   return (
       <div className="App">

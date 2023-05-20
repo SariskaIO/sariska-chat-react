@@ -8,9 +8,7 @@ const SocketProvider = ({children}) => {
     const [socket, setSocket] = useState(null);
     useEffect(() => {
         const fetchData = async ()=> {
-            console.log('socket', socket);
             const token = await getToken();
-            console.log('token',token);
             const params = {token};
             const s = new Socket(WEB_SOCKET_URL, {params});
             s.onOpen( () => console.log("connection open!") )

@@ -1,10 +1,13 @@
 import { Avatar, Box, makeStyles, Typography } from '@material-ui/core';
 import React from 'react'
 import { colors } from '../../assets/styles/colors';
+import { getRandomColor, linkify } from '../../utils';
 
 const useStyles = makeStyles((theme)=>({
     chatLine: {
-        display: 'flex'
+        display: 'flex',
+        alignItems: 'center',
+        marginBottom: '16px'
     },
     text: {
         background: `${colors.gray}`,
@@ -16,9 +19,10 @@ const useStyles = makeStyles((theme)=>({
         marginLeft: '10px'
     },
     userAvatar: {
-        height: '29px', 
-        width: '29px',
-        backgroundColor: `${colors.blue}`
+        height: '24px', 
+        width: '24px',
+        fontSize: '1rem',
+        backgroundColor: `${getRandomColor()}`
     },
 }))
 const MessageItem = ({user, message, id}) => {
@@ -28,9 +32,12 @@ const MessageItem = ({user, message, id}) => {
             <Avatar aria-label="user" className={classes.userAvatar}>
                 {message.created_by_name?.toUpperCase().slice(0,1)}
             </Avatar>
-            <Typography key={id} className={classes.text}>
+            {/* <Typography key={id} className={classes.text}>
                 {message.content}
-            </Typography>
+            </Typography> */}
+            <p style={{fontSize: '1rem', marginLeft: '16px'}} className="MuiTypography-root MuiListItemText-secondary MuiTypography-body2 MuiTypography-colorTextSecondary MuiTypography-displayBlock"
+                            dangerouslySetInnerHTML={{__html: linkify(message?.content, {className: classes.link})}}>
+                            </p>
         </Box>
     );
 
