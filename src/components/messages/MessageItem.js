@@ -25,6 +25,7 @@ const useStyles = makeStyles((theme)=>({
         backgroundColor: `${getRandomColor()}`
     },
 }))
+
 const MessageItem = ({user, message, id}) => {
     const classes = useStyles();
     return (
