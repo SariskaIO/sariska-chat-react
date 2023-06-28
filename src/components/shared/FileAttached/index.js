@@ -27,7 +27,8 @@ const useStyles = makeStyles((theme) => ({
         overflow: 'visible',
         '& img': {
             height: '100%',
-            width: '100%'
+            width: '100%',
+            objectFit: 'contain'
         }
     },
     cb__attached__fileAttached: {

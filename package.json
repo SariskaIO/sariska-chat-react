@@ -9,6 +9,7 @@
     "@testing-library/jest-dom": "^5.11.8",
     "@testing-library/react": "^11.2.2",
     "@testing-library/user-event": "^12.6.0",
+    "clsx": "^1.2.1",
     "compressorjs": "^1.2.1",
     "emoji-picker-react": "^4.4.9",
     "linkify-html": "^4.1.1",
@@ -16,6 +17,7 @@
     "phoenix": "^1.5.7",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-router-dom": "^6.11.2",
     "react-scripts": "4.0.1",
     "styled-components": "^5.2.1",
     "web-vitals": "^0.2.4"
@@ -24,7 +26,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "deploy": "aws s3 cp build s3://chat.sariska.io --recursive --acl public-read && aws cloudfront create-invalidation --distribution-id E2MSGE42T0CPB2 --paths / /bundle.js /index.html"
   },
   "eslintConfig": {
     "extends": [

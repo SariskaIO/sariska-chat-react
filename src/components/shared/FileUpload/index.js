@@ -14,16 +14,17 @@ const useStyles = makeStyles((theme) => ({
         }
     },
     photo: {
-        marginBottom: '-4px',
-        padding: '3px',
+        //marginBottom: '-4px',
+        //padding: '3px',
         color: colors.lightgray1,
     },
     attach: {
         fontSize: '1.3rem', 
-        marginBottom: '-4px',
-        padding: '3px',
+        //marginBottom: '-4px',
+        //padding: '3px',
         transform: 'rotate(30deg)',
         color: colors.lightgray1,
+        marginRight: '6px'
     }
 }))
 
@@ -43,6 +44,7 @@ const FileUpload = ({ type, startFileUpload}) => {
         fileName: file.name,
         fileType: file.type
     }
+    
     startFileUpload({id, name: file.name, type: type, size: file.size, status: 'loading'});
     Promise.all([
         getPresignedUrl(signedUrlOptions),
