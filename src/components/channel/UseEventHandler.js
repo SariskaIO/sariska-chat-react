@@ -3,7 +3,6 @@ import { useEffect, useRef } from 'react'
 const UseEventHandler = (channel, event, setLoading, handler) => {
     const handle = useRef(handler);
     handle.current = handler;
-
     useEffect(()=>{
         if(channel === null){
             return;

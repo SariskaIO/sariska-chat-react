@@ -22,7 +22,7 @@ const Chat = ()=> {
   if(!JSON.parse(localStorage.getItem("sariska-chat-userName"))){
     navigate('/')
   }
-
+  
   UseEventHandler(chatChannel, 'user_joined', setLoading, async (response) => {
        const {room, user}  = response;
             let userDetails = {id : user.id, name: user.name};
