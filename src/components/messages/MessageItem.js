@@ -18,6 +18,7 @@ const useStyles = makeStyles(()=>({
     }
 }))
 const MessageItem = ({message}) => {
+
     const classes = useStyles();
     
     return (
