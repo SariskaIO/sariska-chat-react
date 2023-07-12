@@ -1,6 +1,6 @@
 import { makeStyles } from '@material-ui/core';
 import React from 'react'
-import FileUpload from '../FileUpload'
+import FileUpload from '../../shared/FileUpload';
 
 
 const MediaChat = ({startFileUpload, currentMessage}) => {
@@ -12,8 +12,9 @@ const MediaChat = ({startFileUpload, currentMessage}) => {
             display: 'flex',
             opacity:1,
             width:'56.2px',
-            height: '100%',
-            transition: 'width 0.5s, height 0.5s, opacity 1s 0.2s'
+            //height: '100%',
+            transition: 'width 0.5s, height 0.5s, opacity 1s 0.2s',
+            marginBottom: '-6px'
         },
         fileHide: {
             alignItems: 'center',

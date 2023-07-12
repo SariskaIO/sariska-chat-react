@@ -1,25 +1,41 @@
+import { MESSAGING_API_SERVICE_HOST, SARISKA_API_KEY } from "../config";
 import {GENERATE_TOKEN_URL, GET_PRESIGNED_URL} from "../constants";
 import linkifyHtml from 'linkify-html';
 
 const Compressor = require('compressorjs');
 
+export function getUserId() {
+    const characters ='abcdefghijklmnopqrstuvwxyz';
+    function generateString(length) {
+        let result = ' ';
+        const charactersLength = characters.length;
+        for ( let i = 0; i < length; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+    }
+    const str = generateString(9).trim()
+    const strArr = str.match(/.{3}/g);
+    return strArr.join("-");
+}
 
-
-export const getToken = async ()=> {
-
+export const getToken = async (username, userId)=> {
     const body = {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            apiKey: "27fd6f9e85c304447d3cc0fb31e7ba8062df58af86ac3f9437", // enter your app secret
+            apiKey: `${SARISKA_API_KEY}`, // enter your app secret,
+            user: {
+                id: userId,
+                name: username
+            },
         })
     };
 
     try {
         const response = await fetch(GENERATE_TOKEN_URL, body);
-
         if (response.ok) {
             const json = await response.json();
             return json.token;
@@ -27,7 +43,7 @@ export const getToken = async ()=> {
             console.log(response.status);
         }
     } catch (error) {
-        console.log('error', error);
+        console.log(error);
     }
 
 }
@@ -39,7 +55,7 @@ export function getPresignedUrl(params) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem("SARISKA_TOKEN")}`
+                'Authorization': `Bearer ${JSON.parse(localStorage.getItem("SARISKA_CHAT_TOKEN"))}`
             },
             body: JSON.stringify({
                 fileType: params.fileType,
@@ -56,6 +72,7 @@ export function getPresignedUrl(params) {
             .then(function (response) {
                 resolve(response);
             }).catch((error) => {
+                console.log(error);
             reject(error)
         })
     });
@@ -116,3 +133,137 @@ export function getRandomColor() {
     }
     return color;
 }
+
+export const getIntialUpperCaseString = (string) => {
+    if(string){
+        return string.slice(0,1).toUpperCase()
+    }else{
+        return ''
+    };
+}
+
+export const renderAction = (type, payload) => {
+    if(payload){
+        return {
+            type,
+            payload
+        }
+    }else{
+        return {
+            type
+        }
+    }
+}
+
+export async function apiCall(path, method, body = {}, headers = {}, loader=false) {
+    let url = `${MESSAGING_API_SERVICE_HOST}${path}`;
+    const requestHeaders = {
+        "Content-Type": "application/json", 
+        "Authorization": `Bearer ${
+            JSON.parse(localStorage.getItem("SARISKA_CHAT_TOKEN"))
+        }`,
+        ...headers
+    };
+    if (method.toUpperCase() === "GET" && Object.keys(body).length) {
+        const queryString = new URLSearchParams(body).toString();
+        url = `${url}?${queryString}`;
+    }
+    
+    const payload = {
+        method,
+        headers: requestHeaders,
+    };
+    if (method.toUpperCase() !== "GET" && method.toUpperCase() !== "HEAD") {
+        payload.body = JSON.stringify(body);
+    }
+  
+    try {
+        const response = await fetch(url, payload);
+        if (response.status === 401) {
+            console.log('not authenticated');
+        }
+  
+        if (response.status === 403 && method.toUpperCase() !== "GET") {
+            console.log('not autherized');
+        }
+  
+        if (response.status === 204) {
+            return {};
+        }
+        if (response.ok) {
+            return await response.json();
+        }
+        return {
+            httpStatus: response.status,
+            statusText: response.statusText,
+            body: await response.json(),
+        };
+    } catch (error) {
+        return {error, httpStatus: 500};
+    }
+  }
+
+  export const isEmptyObject = (obj) => {
+    if(typeof obj !== 'object' ) return false;
+    return Object.keys(obj).length === 0;
+  };
+
+//   export const pushMessage = (message, options, type, user, setMessages, chatChannel)=>{
+     
+//       const new_message =  {
+//         content: message, 
+//         content_type: type, 
+//         created_by_name: user.name,  
+//         options: options,
+//         x: "uu", 
+//         y: { x: "ghhg"}
+//       };
+//       setMessages(messages => [...messages, new_message]);
+//       chatChannel.push('new_message', new_message);
+//   };
+//   export const pushOptions = (option, type, setMessages, chatChannel)=>{
+//     const new_option =  {
+//       option: option,
+//       contentType: type
+//     };
+//     setMessages(messages => [...messages, new_option]);
+//     chatChannel.push('new_option', new_message);
+// };
+  
+  export const adjustTextMessage = (text) => {
+    return text.trim();
+  };
+  
+  export const isMessageEmpty = (text, fileAttached) => {
+    let textLength = adjustTextMessage(text).length;
+    let fileLength = fileAttached.length;
+    if (
+      (!textLength && fileLength) ||
+      (textLength && !fileLength) ||
+      (textLength && fileLength)
+    ) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  export const hasDuplicates = (array) => {
+    return new Set(array).size !== array.length;
+  }
+
+  export const getMaxInArray = (arr) => {
+    if(!arr?.length) return 0;
+    else return Math.max(...arr);
+  }
+
+  export const getSingularOrPlural = (num, text) => {
+    return num > 1 ? text + 's' : text;
+  }
+
+  export const convertTimestamptoLocalDateTime = (timestamp) => {
+    const datetime = new Date(timestamp);
+    let time = datetime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
+    let date = datetime.toDateString();
+    return date +' '+time;
+  }

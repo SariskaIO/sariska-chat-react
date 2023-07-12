@@ -3,9 +3,9 @@ import MessageItem from "./MessageItem";
 import { makeStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
 import CardHeader from "@material-ui/core/CardHeader";
-import CardMedia from "@material-ui/core/CardMedia";
 import CardContent from "@material-ui/core/CardContent";
 import CardActions from "@material-ui/core/CardActions";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import {
   Avatar,
   Box,
@@ -15,16 +15,19 @@ import {
   Tooltip,
   Zoom,
 } from "@material-ui/core";
-import IconButton from "@material-ui/core/IconButton";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
 import Typography from "@material-ui/core/Typography";
 import { colors } from "../../assets/styles/colors";
-import CreateIcon from "@material-ui/icons/Create";
 import DoneAllIcon from "@material-ui/icons/DoneAll";
+import PollOutlinedIcon from "@material-ui/icons/PollOutlined";
 import { AvatarGroup } from "@material-ui/lab";
-import EmojiPicker, { Emoji } from "emoji-picker-react";
-import FileAttached from "./FileAttached";
+import FileAttached from "../shared/FileAttached";
 import MediaChat from "./MediaChat";
+import EmojiPickerContainer from "../shared/EmojiPickerContainer";
+import Model from "../shared/Model";
+import VotePoll from "../shared/Poll/VotePoll";
+import { useStore } from "../../context";
+import { useNavigate } from "react-router-dom";
+import { getRandomColor, hasDuplicates, isMessageEmpty } from "../../utils";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -41,22 +44,29 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
     height: "60vh",
+    background: colors.white1,
   },
   cardHeader: {
-    backgroundColor: `${colors.skyblue}`,
+    backgroundColor: `${colors.primaryLight}`,
   },
   avatarList: {
     display: "flex",
     flexDirection: "row",
   },
+  arrow: {
+    "&: hover": {
+      opacity: "0.9",
+      cursor: "pointer",
+    },
+  },
   cardContent: {
     flex: 1,
     height: "200px",
     overflow: "auto",
-    padding: '16px 73px',
-    [theme.breakpoints.down('md')]: {
-      padding: '16px',
-    }
+    padding: "16px 73px",
+    [theme.breakpoints.down("md")]: {
+      padding: "16px",
+    },
   },
   cardAction: {
     boxShadow: "0px 4px 4px 2px rgba(0,0,0,0.8)",
@@ -72,7 +82,7 @@ const useStyles = makeStyles((theme) => ({
     padding: "2px",
   },
   enterText: {
-    backgroundColor: `${colors.skyblue}`,
+    backgroundColor: `${colors.primaryLight}`,
     "&:hover": {
       opacity: "0.8",
       cursor: "pointer",
@@ -81,8 +91,11 @@ const useStyles = makeStyles((theme) => ({
   box: {
     textAlign: "left",
   },
+
   chatLine: {
     display: "flex",
+    //alignItems: 'center',
+    marginBottom: "16px",
   },
   text: {
     background: `${colors.gray}`,
@@ -94,11 +107,13 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: "10px",
   },
   userAvatar: {
-    height: "29px",
-    width: "29px",
-    backgroundColor: `${colors.blue}`,
+    height: "24px",
+    width: "24px",
+    fontSize: "1rem",
+    backgroundColor: `${getRandomColor()}`,
+    marginRight: theme.spacing(2),
+    marginTop: theme.spacing(0.5),
   },
-
   userAvatar1: {
     height: "26px",
     width: "26px",
@@ -112,32 +127,45 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 700,
     fontSize: "110%",
   },
+  poll: {
+    color: colors.lightgray1,
+    marginBottom: "-2px",
+    marginRight: "-3px",
+    "&:hover": {
+      color: colors.primaryLight,
+    },
+  },
 }));
 
-const MessageList = ({ messages, pushMessage, user }) => {
+const initialState = {
+  poll: {
+    question: " ",
+    options: ["", ""],
+    error: "",
+  }
+};
+
+const MessageList = ({
+  messages,
+  pushMessage,
+  loading,
+  pushVote,
+  newVotes,
+  messageId
+}) => {
   const classes = useStyles();
   const [text, setText] = useState("");
-  const [chat, setChat] = useState("");
-  const [room, setRoom] = useState(null);
+  //const [chat, setChat] = useState("");
   const [isPickerVisible, setIsPickerVisible] = useState(false);
-  const [selectedEmoji, setSelectedEmoji] = useState(null);
   let [fileAttached, setFileAttached] = useState([]);
-  //const [user, setUser] = useState(null);
-
-  const isMessageEmpty = () => {
-    let textLength = adjustTextMessage(text).length;
-    let fileLength = fileAttached.length
-    if((!textLength && fileLength) || (textLength && !fileLength) || (textLength && fileLength)){
-        return false;
-    }else{
-        return true;
-    }
-  };
-
-  const adjustTextMessage = (text) => {
-    return text.trim();
-  };
-  const disableButton = isMessageEmpty();
+  const [openPoll, setOpenPoll] = React.useState(false);
+  const [poll, setPoll] = useState(initialState.poll);
+  const [counter, setCounter] = useState(initialState.counter);
+  const navigate = useNavigate();
+  const {
+    users: { user },
+    rooms: { room },
+  } = useStore();
 
   const handleChange = (e) => {
     setText(e.target.value);
@@ -148,7 +176,6 @@ const MessageList = ({ messages, pushMessage, user }) => {
   };
 
   const handleEmojiClick = (emojiData, event) => {
-    setSelectedEmoji(emojiData);
     setText(text + emojiData.emoji);
     setIsPickerVisible(!isPickerVisible);
   };
@@ -169,14 +196,82 @@ const MessageList = ({ messages, pushMessage, user }) => {
   const removeAttachment = (id) => {
     setFileAttached(fileAttached.filter((file) => file.id !== id));
   };
-  
+
+  const handleOpenPoll = () => {
+    setOpenPoll(true);
+  };
+
+  const handleChangePoll = (e, index, optValue) => {
+    if (e.target.name === "question") {
+      setPoll((poll) => ({ ...poll, question: e.target.value }));
+    } else {
+      const updatedPollOptions = [...poll.options];
+      updatedPollOptions[index] = optValue;
+      setPoll((poll) => ({
+        ...poll,
+        options: updatedPollOptions,
+      }));
+    }
+  };
+
+  const disableButton = isMessageEmpty(text, fileAttached);
+
+  const handleClosePoll = (e) => {
+    e.preventDefault();
+    setPoll(initialState.poll);
+    setOpenPoll(false);
+  };
+
+  const handleSubmitPoll = (e) => {
+    e.preventDefault();
+    setPoll((poll) => ({ ...poll, error: `` }));
+    if (!poll.question || poll.question.trim() === "") {
+      setPoll((poll) => ({
+        ...poll,
+        error: "Poll Question can't be kept blank",
+      }));
+      return;
+    }
+    for (let opt of poll.options) {
+      let index = poll.options.indexOf(opt);
+      if (!opt) {
+        setPoll((poll) => ({
+          ...poll,
+          error: `Poll Option ${index + 1} can't be kept blank`,
+        }));
+        break;
+      }
+    }
+
+    if (hasDuplicates(poll.options)) {
+      setPoll((poll) => ({
+        ...poll,
+        error: `Poll can't have duplicate options`,
+      }));
+    }
+
+    if (poll.error) {
+      return;
+    }
+    //setPoll((poll) => ({ ...poll, question: poll.question.trim() }));
+    let trimmedPoll = {...poll, question: poll.question.trim()};
+    pushMessage(trimmedPoll, "poll");
+
+    if (!disableButton) {
+      setPoll(initialState.poll);
+    }
+    setOpenPoll(false);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (fileAttached.find((item) => item.status === "loading")) {
       return;
     }
     if (!disableButton) {
-      text && pushMessage(text);
+      if (text) {
+        pushMessage(text);
+      }
       if (fileAttached.length) {
         fileAttached.map((item) => {
           if (item.status === "done") {
@@ -185,18 +280,17 @@ const MessageList = ({ messages, pushMessage, user }) => {
         });
       }
     }
-    setChat((chat) => [...chat, text]);
-    if (!disableButton) {
-      setText("");
-      setFileAttached([]);
-    }
+    setText("");
+    setFileAttached([]);
+    //setChat((chat) => [...chat, text]);
   };
 
   useEffect(() => {
-    const userDetails = JSON.parse(localStorage.getItem("user"));
-    const roomDetails = JSON.parse(localStorage.getItem("room"));
+    //const userDetails = JSON.parse(localStorage.getItem("user"));
+    //const roomDetails = JSON.parse(localStorage.getItem("room"));
     //setUser(userDetails);
-    setRoom(roomDetails);
+    //setRoom(roomDetails);
+    scrollToBottom();
   }, []);
 
   const scrollRef = useRef(null);
@@ -206,7 +300,9 @@ const MessageList = ({ messages, pushMessage, user }) => {
   useEffect(() => {
     scrollToBottom();
   }, [text]);
-  
+
+  const goBack = () => navigate("/");
+
   return (
     <div className={classes.root}>
       <Card className={classes.card}>
@@ -223,12 +319,38 @@ const MessageList = ({ messages, pushMessage, user }) => {
               </Tooltip>
             </div>
           }
-          action={
-            <IconButton aria-label="settings">
-              <MoreVertIcon />
-            </IconButton>
+          // action={
+          //   <IconButton aria-label="settings">
+          //     <MoreVertIcon />
+          //   </IconButton>
+          // }
+          title={
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                color: colors.white,
+              }}
+            >
+              <ArrowBackIcon onClick={goBack} className={classes.arrow} />
+              <div style={{ fontWeight: 900, fontSize: "1.2rem" }}>
+                <span>Room Name : </span>
+                {!loading ? (
+                  <span style={{ color: colors.searchFocus }}>
+                    {room?.session_id}
+                  </span>
+                ) : null}
+              </div>
+              <div style={{ fontWeight: 900, fontSize: "1.2rem" }}>
+                <span> User : </span>
+                {!loading ? (
+                  <span style={{ color: colors.searchFocus }}>
+                    {user?.name}
+                  </span>
+                ) : null}
+              </div>
+            </div>
           }
-          title={`Room Name: ${room?.session_id}, Name: ${user?.name}`}
           className={classes.cardHeader}
         />
         <CardContent className={classes.cardContent}>
@@ -238,32 +360,49 @@ const MessageList = ({ messages, pushMessage, user }) => {
             component="p"
           ></Typography>
           <Box className={classes.box}>
-            {messages.map((message, id) => {
-              return <MessageItem message={message} id={id} user={user} />;
-            })}
+            {messages.map((message, id) => (
+              <Box className={classes.chatLine} key={message.id}>
+                <Avatar aria-label="user" className={classes.userAvatar}>
+                  {message.created_by_name?.toUpperCase().slice(0, 1)}
+                </Avatar>
+
+                {
+                  message.content_type === "poll" ? (
+                    <VotePoll
+                      username={message?.created_by_name}
+                      poll={message}
+                      counter={counter}
+                      pushVote={pushVote}
+                      newVotes={newVotes}
+                      messageId={messageId}
+                    />
+                  ) : (
+                    <MessageItem message={message} id={id} user={user} />
+                  )
+                }
+              </Box>
+            ))}
           </Box>
           <Typography ref={scrollRef} style={{ height: "18px" }}></Typography>
         </CardContent>
-            {
-                fileAttached.length>0 && (
-                    <Box className={classes.cb__chatWrapper__attachements}>
-                        {
-                            fileAttached.map((file, index)=>(
-                                <FileAttached 
-                                    key={index}
-                                    fileData={file}
-                                    removeAttachment={removeAttachment}
-                                />
-                            ))
-                        }
-                    </Box>
-                )
-            }
+        {fileAttached.length > 0 && (
+          <Box className={classes.cb__chatWrapper__attachements}>
+            {fileAttached.map((file, index) => (
+              <FileAttached
+                key={index}
+                fileData={file}
+                removeAttachment={removeAttachment}
+              />
+            ))}
+          </Box>
+        )}
         <CardActions disableSpacing className={classes.cardAction}>
-        {<MediaChat
-                                    startFileUpload={startFileUpload}
-                                    currentMessage={text}
-                                />}
+          {
+            <MediaChat
+              startFileUpload={startFileUpload}
+              currentMessage={text}
+            />
+          }
           <form
             noValidate
             autoComplete="off"
@@ -283,27 +422,35 @@ const MessageList = ({ messages, pushMessage, user }) => {
                     borderRadius: "50%",
                     minWidth: "50%",
                   }}
-                  onClick={handleEmojiPicker}
+                  onClick={handleOpenPoll}
                 >
-                  <Emoji unified="1f600" size="32" />
+                  <Tooltip title="Poll" placement="top">
+                    <PollOutlinedIcon className={classes.poll} />
+                  </Tooltip>
                 </Button>
               </Grid>
+              <Model
+                open={openPoll}
+                poll={poll}
+                setPoll={setPoll}
+                handleChange={handleChangePoll}
+                handleClose={handleClosePoll}
+                handleSubmit={handleSubmitPoll}
+              />
+              <Grid item>
+                <EmojiPickerContainer
+                  handleEmojiClick={handleEmojiClick}
+                  handleEmojiPicker={handleEmojiPicker}
+                  isVisible={isPickerVisible}
+                  position={"absolute"}
+                  left={"60px"}
+                  bottom={"75px"}
+                  emojiStyle={"apple"}
+                  showPreview={false}
+                  height={350}
+                />
+              </Grid>
               <Grid item style={{ flex: 1 }}>
-                {isPickerVisible ? (
-                  <Box
-                    sx={{ position: "absolute", left: "60px", bottom: "145px" }}
-                  >
-                    <EmojiPicker
-                      onEmojiClick={handleEmojiClick}
-                      emojiStyle="apple"
-                      searchDisabled
-                      previewConfig={{
-                        showPreview: false,
-                      }}
-                      height={350}
-                    />
-                  </Box>
-                ) : null}
                 <TextField
                   id="text"
                   label="Enter Text Here"

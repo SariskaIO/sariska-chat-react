@@ -25,12 +25,12 @@ const useStyles = makeStyles((theme) => ({
     },
   }));
 
-const ChatWindow = ({messages, user, pushMessage, room}) => {
+const ChatWindow = ({messages, pushMessage, loading, pushVote, newVotes, messageId}) => {
     const classes = useStyles();
 
     return (
         <div className={classes.root}>
-            <MessageList messages={messages} user={user} pushMessage={pushMessage} room={room}/>
+            <MessageList messages={messages} pushMessage={pushMessage} loading={loading} pushVote={pushVote} newVotes={newVotes} messageId={messageId} />
         </div>
     )
 }
