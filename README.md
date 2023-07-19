@@ -1,6 +1,6 @@
 # Live Demo
 
-You can find a deployed version of the chat demo here: https://sariska-chat-react.netlify.app/
+You can find a deployed version of the chat demo here: https://chat.sariska.io/
 
 # Getting Started with Create React App
 
