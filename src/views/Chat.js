@@ -16,8 +16,9 @@ const Chat = ()=> {
   const [loading, setLoading] = useState(false);
   const [newVotes, setNewVotes] = useState([]);
   const [messageId, setMessageId] = useState(null);
-  const chatChannel = CreateChannel(`chat:${rooms.roomName}`, {});
   const navigate = useNavigate();
+
+  const chatChannel = CreateChannel(`chat:${rooms.roomName}`, {});
 
   if(!JSON.parse(localStorage.getItem("sariska-chat-userName"))){
     navigate('/')
@@ -31,8 +32,17 @@ const Chat = ()=> {
             dispatch(setUser(SET_USER, userDetails));
   });
 
-  UseEventHandler(chatChannel, 'ping', message => {
+  UseEventHandler(chatChannel, 'ping', setLoading, message => {
     console.info('ping', message)
+  })
+console.log('process.enf', process.env.NODE_ENV)
+  UseEventHandler(chatChannel, "presence_state",setLoading, (response) => {
+    
+    console.log('presences', response);
+  })
+  UseEventHandler(chatChannel, "presence_diff",setLoading, (response) => {
+    
+    console.log('presence_diff', response);
   })
 
   UseEventHandler(chatChannel, 'new_message', setLoading, message => {
